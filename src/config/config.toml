@@ -1,0 +1,52 @@
+[data]
+raw_data_dir = "data/raw"
+processed_data_dir = "data/processed"
+input_format = "mdx"  # Format of the input files
+
+[preprocessing]
+remove_stopwords = true
+lemmatize = true
+min_word_length = 3
+remove_numbers = true
+custom_stopwords = ["um", "uh", "like", "you know", "i mean", "actually"]
+
+[sentiment_analysis]
+model = "vader"  # Alternatives could be "textblob", "flair", etc.
+compound_threshold_positive = 0.05
+compound_threshold_negative = -0.05
+
+[topic_modeling]
+algorithm = "lda"  # Latent Dirichlet Allocation
+num_topics = 5     # Number of topics to extract
+passes = 10        # Number of passes through the corpus during training
+min_df = 5         # Minimum document frequency for words to be included
+max_df = 0.9       # Maximum document frequency (as a percentage)
+
+[llm]
+enabled = true     # Whether to use LLM features
+model = "openai"   # LLM provider: "openai", "anthropic", or "local"
+api_key = ""       # API key (or use environment variable OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)
+temperature = 0.3  # Controls randomness (0.0 = deterministic, 1.0 = creative)
+max_tokens = 1000  # Maximum number of tokens in the response
+# Model-specific settings
+openai_model = "gpt-4"
+anthropic_model = "claude-3-opus-20240229"
+local_url = "http://localhost:8000/v1/chat/completions"
+local_model = "mistral-7b-instruct"
+# Prompt customization
+system_prompt = "You are an expert therapist with extensive training in psychology, cognitive behavioral therapy, and psychoanalysis. Your task is to analyze therapy session transcripts and provide insightful, professional observations about client patterns, emotional states, and potential therapeutic directions."
+
+[visualization]
+fig_width = 12
+fig_height = 8
+dpi = 100
+style = "seaborn-v0_8-whitegrid"
+color_palette = "viridis"
+date_format = "%Y-%m-%d"
+
+[reports]
+summary_length = 3  # Number of sentences in the summary
+highlight_count = 5  # Number of key points to highlight
+save_format = "md"  # Format for saving reports (md, txt, html)
+report_dir = "reports"
+include_llm_insights = true  # Whether to include LLM-generated insights in reports
