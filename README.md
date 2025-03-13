@@ -133,6 +133,173 @@ This project relies on the following main libraries:
 - matplotlib (~3.7.3) & seaborn (~0.12.2) - Visualization
 - openai (~0.28.1) & anthropic (~0.8.1) - LLM integration (optional)
 
+## Pipeline Architecture
+
+The therapy session analysis pipeline consists of several modular components that work together to process therapy transcripts and extract meaningful insights. Below is a detailed explanation of each step in the pipeline and the technologies used:
+
+### 1. Data Loading and Preprocessing
+
+**Component**: `src/data/loader.py` and `src/preprocessor/text_processor.py`
+
+**Description**: This step involves loading therapy session transcripts from various file formats and preparing the text for analysis.
+
+**Technologies Used**:
+
+- **pandas**: For data manipulation and creating structured DataFrames from raw transcripts
+- **regular expressions**: For pattern matching to identify speakers and dialogue
+- **YAML parser**: For extracting metadata from frontmatter in MDX files
+- **JSON parser**: For processing structured JSON transcripts
+
+**Process**:
+
+1. Identify file type (MDX, JSON, TXT) and extract session metadata
+2. Parse dialogue, identifying therapist and client utterances
+3. Extract session date from filename or metadata
+4. Validate transcript structure and data integrity
+5. Organize data into standardized DataFrame format
+
+### 2. Text Preprocessing
+
+**Component**: `src/preprocessor/text_processor.py`
+
+**Description**: Raw text is cleaned and normalized to improve the quality of downstream analysis.
+
+**Technologies Used**:
+
+- **NLTK**: For tokenization, stop word removal, and stemming/lemmatization
+- **string manipulation**: For text normalization and cleaning
+
+**Process**:
+
+1. Tokenization: Split text into individual words or tokens
+2. Normalization: Convert text to lowercase, remove punctuation
+3. Stop word removal: Filter out common words with little semantic value
+4. Lemmatization: Reduce words to their base forms
+5. Special character handling: Process domain-specific symbols and abbreviations
+
+### 3. Sentiment Analysis
+
+**Component**: `src/analyzers/sentiment_analyzer.py`
+
+**Description**: Evaluates the emotional tone of the dialogue, identifying positive, negative, and neutral sentiments.
+
+**Technologies Used**:
+
+- **NLTK VADER**: For rule-based sentiment analysis optimized for social media and conversational text
+- **pandas**: For organizing sentiment scores and metadata
+
+**Process**:
+
+1. Process each utterance with VADER to get compound, positive, negative, and neutral scores
+2. Calculate session-level sentiment metrics (averages, trends within session)
+3. Track sentiment changes between client and therapist
+4. Identify emotional peaks and transitions during the session
+5. Generate summary statistics for the session's emotional tone
+
+### 4. Topic Modeling
+
+**Component**: `src/analyzers/topic_modeler.py`
+
+**Description**: Discovers latent topics or themes in the dialogue using unsupervised learning.
+
+**Technologies Used**:
+
+- **Gensim**: For Latent Dirichlet Allocation (LDA) implementation
+- **scikit-learn**: For TF-IDF vectorization and NMF alternative topic modeling
+- **NLTK**: For additional text processing specific to topic modeling
+
+**Process**:
+
+1. Create document-term matrix using TF-IDF vectorization
+2. Train LDA model with optimal hyperparameters (determined through coherence scores)
+3. Extract top keywords for each topic
+4. Assign topic probability distributions to each utterance
+5. Track topic prevalence throughout the session
+6. Create human-readable topic labels based on keyword clusters
+
+### 5. Progress Tracking
+
+**Component**: `src/analyzers/progress_tracker.py`
+
+**Description**: Analyzes changes in sentiment and topics across multiple sessions to track therapeutic progress.
+
+**Technologies Used**:
+
+- **pandas**: For time-series analysis and data manipulation
+- **numpy**: For numerical calculations and trend analysis
+- **scikit-learn**: For regression analysis to identify trends
+
+**Process**:
+
+1. Aggregate sentiment and topic data across sessions
+2. Calculate moving averages and trends
+3. Identify significant changes in emotional tone or topic prevalence
+4. Compare client language patterns across sessions
+5. Generate progress metrics and quantifiable indicators of therapeutic change
+
+### 6. Visualization
+
+**Component**: `src/visualizers/`
+
+**Description**: Creates visual representations of the analysis results to facilitate understanding and interpretation.
+
+**Technologies Used**:
+
+- **matplotlib**: For creating base plots and charts
+- **seaborn**: For enhanced statistical visualizations
+- **plotly** (optional): For interactive visualizations
+
+**Process**:
+
+1. Generate sentiment trend charts showing emotional changes over time
+2. Create topic distribution visualizations (bar charts, heatmaps)
+3. Produce session comparison visualizations to track progress
+4. Generate word clouds for topic keywords
+5. Create interactive timeline visualizations of therapy progression
+
+### 7. Report Generation
+
+**Component**: `src/reports/report_generator.py`
+
+**Description**: Compiles analysis results into comprehensive, human-readable reports.
+
+**Technologies Used**:
+
+- **Markdown**: For formatting report text
+- **Jinja2**: For templating report structures
+- **pandas**: For organizing data for reports
+
+**Process**:
+
+1. Compile analysis results from all pipeline components
+2. Generate individual session reports with detailed insights
+3. Create progress reports comparing multiple sessions
+4. Highlight key findings and actionable insights
+5. Format reports with appropriate headings, sections, and visualizations
+
+### 8. LLM Integration (Optional)
+
+**Component**: `src/llm/`
+
+**Description**: Leverages large language models to generate enhanced insights, summaries, and recommendations.
+
+**Technologies Used**:
+
+- **OpenAI API**: For accessing GPT models (requires API key)
+- **Anthropic API**: For accessing Claude models (requires API key)
+- **requests**: For API communication
+
+**Process**:
+
+1. Prepare prompts based on session content and analysis results
+2. Send contextual data to the LLM API with appropriate parameters
+3. Process and validate LLM responses
+4. Integrate LLM-generated insights into reports
+5. Generate therapeutic recommendations based on session content
+6. Create natural language summaries of technical analysis results
+
+Each component in the pipeline is designed to be modular, allowing users to customize or replace specific parts based on their needs while maintaining the overall workflow.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
