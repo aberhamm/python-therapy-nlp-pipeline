@@ -1,1 +1,52 @@
-data/*
+# Environment variables
+*.env
+.env
+
+# Generated data and output
+data/processed/*
+data/raw/*
+logs/*
+reports/*
+
+# Python bytecode
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Poetry / packaging artifacts
+dist/
+build/
+*.egg-info/
+*.egg
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# NLP / ML model files
+*.pkl
+*.pickle
+*.joblib
+*.model
+*.model.state
+*.npy
+*.h5
+nltk_data/
+
+# macOS
+.DS_Store
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo

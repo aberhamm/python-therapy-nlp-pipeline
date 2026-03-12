@@ -25,6 +25,293 @@ poetry install -E llm
 pip install -r requirements.txt
 ```
 
+## Getting Started
+
+This section will guide you through setting up and running the therapy transcript analysis pipeline with sample data.
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+1. Python 3.8.1 or later installed
+2. Poetry (recommended) or pip for package management
+3. Basic familiarity with command line tools
+4. (Optional) API keys for OpenAI or Anthropic if using LLM features
+
+### Quick Start Guide
+
+#### 1. Clone the Repository and Install
+
+```bash
+# Clone the repository
+git clone https://github.com/username/python-therapy-nlp-pipeline
+cd python-therapy-nlp-pipeline
+
+# Install dependencies
+poetry install  # or 'pip install -r requirements.txt'
+```
+
+#### 2. Set Up Sample Data
+
+The repository includes sample therapy transcript data in the `data/raw` directory. If you want to use your own data, format it according to the [Input Data Format](#input-data-format) section and place it in this directory.
+
+#### 3. Run Basic Analysis
+
+```bash
+# Using Poetry
+poetry run therapy-nlp --input data/raw --output reports
+
+# Using Python directly
+python src/pipeline.py --input data/raw --output reports
+```
+
+This will:
+
+- Load transcripts from `data/raw`
+- Process and analyze the text
+- Generate sentiment analysis and topic modeling
+- Create visualizations and reports in the `reports` directory
+
+#### 4. Explore the Results
+
+After running the pipeline, check the `reports` directory for:
+
+- **Individual session reports**: Details about each transcript's analysis
+- **Progress report**: Analysis of changes across multiple sessions
+- **Visualizations**: Charts showing sentiment trends and topic distributions
+
+#### 5. Enable LLM Features (Optional)
+
+To use LLM-enhanced analysis:
+
+```bash
+# Set your API key as an environment variable
+export OPENAI_API_KEY="your-api-key-here"  # For OpenAI
+# OR
+export ANTHROPIC_API_KEY="your-api-key-here"  # For Anthropic
+
+# Run the pipeline with LLM features
+poetry run therapy-nlp --input data/raw --output reports
+```
+
+### Walkthrough with Sample Data
+
+Let's analyze the sample therapy transcripts step by step:
+
+1. **Examine the input**: The sample transcripts in `data/raw` show therapy sessions for a client over multiple dates.
+
+2. **Run the pipeline**:
+
+   ```bash
+   poetry run therapy-nlp --input data/raw --output reports
+   ```
+
+3. **Understand the output**:
+   - Open the `reports/overall_progress.md` file to see the client's emotional progress
+   - Examine the topic evolution chart to identify recurring themes
+   - Review individual session reports to understand the client's journey
+
+### Customizing the Pipeline
+
+To adjust pipeline behavior, modify the configuration file at `src/config/config.toml`:
+
+```bash
+# Use a custom config file
+poetry run therapy-nlp --config my_custom_config.toml --input data/raw --output reports
+```
+
+Common customizations include:
+
+- Adjusting the number of topics for topic modeling
+- Changing visualization styles and colors
+- Modifying text preprocessing parameters
+- Configuring LLM settings for different types of insights
+
+### Troubleshooting
+
+**Missing NLTK resources**: If you encounter errors about missing NLTK data, run:
+
+```python
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('vader_lexicon')
+```
+
+**LLM API issues**:
+
+- Verify your API key is set correctly
+- Check your internet connection
+- Ensure your API key has sufficient credits/quota
+
+**Performance concerns**: For large datasets, consider processing files in smaller batches or adjusting the topic modeling parameters for faster execution.
+
+**Installation or script issues**: If you encounter problems with package installation or running the scripts, see our detailed [Troubleshooting Guide](TROUBLESHOOTING.md).
+
+### Simple Example: Creating and Analyzing a Transcript
+
+Let's create a simple therapy transcript and analyze it:
+
+1. **Create a new transcript file**:
+
+Create a file named `session_2023-07-15_new.mdx` in the `data/raw` directory with this content:
+
+```mdx
+---
+title: 'Weekly Therapy Session'
+patient: 'John Doe'
+therapist: 'Dr. Smith'
+session_type: 'Individual'
+---
+
+Therapist: How have you been feeling since our last session?
+
+Client: I've been having ups and downs. Work has been stressful, but I tried those breathing exercises you suggested when I feel overwhelmed.
+
+Therapist: That's good to hear. How effective were the breathing exercises for you?
+
+Client: They helped a lot actually. I was surprised. The first time I tried, I felt silly, but then I noticed my heart rate slowing down.
+
+Therapist: That's excellent progress. What about your sleep patterns we discussed last time?
+
+Client: Still struggling with that. I'm getting maybe 5-6 hours, and I wake up a few times during the night.
+
+Therapist: Let's explore that more. What do you think is keeping you awake?
+
+Client: Mostly worrying about work deadlines and replaying conversations in my head.
+
+Therapist: I see. Would you be open to trying a new evening routine to help with sleep?
+
+Client: Yes, definitely. I'm willing to try anything at this point.
+```
+
+2. **Run the pipeline on your new transcript**:
+
+```bash
+poetry run therapy-nlp --input data/raw --output reports
+```
+
+3. **Examine the results**:
+
+Open `reports/session_2023-07-15_new.md` to see:
+
+- Sentiment analysis showing emotional tone throughout the session
+- Identified topics including "sleep issues," "stress management," and "coping techniques"
+- Visualization of sentiment flow during the conversation
+- (If LLM is enabled) Enhanced insights about John's progress with breathing techniques and areas that need work
+
+This example demonstrates how the pipeline identifies key therapeutic elements like:
+
+- Client's progress with coping strategies
+- Ongoing challenges with sleep
+- The therapist's approach to building on successful interventions
+- Potential areas for future sessions
+
+### Minimal Example Script
+
+For those who want to understand the core functionality or integrate parts of the pipeline into their own code, here's a minimal example script that demonstrates the key components:
+
+```python
+# minimal_example.py
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+from gensim.models import LdaModel
+from gensim.corpora import Dictionary
+
+# Ensure NLTK resources are available
+nltk.download('vader_lexicon', quiet=True)
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
+
+# 1. Load a sample transcript
+transcript_path = 'data/raw/session_2023-07-15_new.mdx'
+with open(transcript_path, 'r') as file:
+    content = file.read()
+
+# 2. Extract dialogue (simplified)
+dialogue = []
+for line in content.split('\n'):
+    if 'Therapist:' in line or 'Client:' in line:
+        parts = line.split(':', 1)
+        if len(parts) == 2:
+            speaker, text = parts[0], parts[1].strip()
+            dialogue.append({'speaker': speaker, 'text': text})
+
+# 3. Create a DataFrame
+df = pd.DataFrame(dialogue)
+print(f"Loaded {len(df)} dialogue turns")
+
+# 4. Sentiment Analysis
+sia = SentimentIntensityAnalyzer()
+df['sentiment'] = df['text'].apply(lambda x: sia.polarity_scores(x)['compound'])
+
+# 5. Prepare text for topic modeling
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+stop_words = set(stopwords.words('english'))
+def preprocess_text(text):
+    tokens = word_tokenize(text.lower())
+    tokens = [t for t in tokens if t.isalpha() and t not in stop_words]
+    return tokens
+
+df['tokens'] = df['text'].apply(preprocess_text)
+
+# 6. Topic Modeling
+# Create dictionary and corpus
+dictionary = Dictionary(df['tokens'])
+corpus = [dictionary.doc2bow(text) for text in df['tokens']]
+
+# Train LDA model
+lda_model = LdaModel(
+    corpus=corpus,
+    id2word=dictionary,
+    num_topics=3,
+    passes=10
+)
+
+# 7. Display Results
+print("\nSentiment Analysis:")
+print(f"Average sentiment: {df['sentiment'].mean():.2f}")
+print(f"Client sentiment: {df[df['speaker'] == 'Client']['sentiment'].mean():.2f}")
+print(f"Therapist sentiment: {df[df['speaker'] == 'Therapist']['sentiment'].mean():.2f}")
+
+print("\nDiscovered Topics:")
+for topic_id, topic in lda_model.print_topics(num_words=5):
+    print(f"Topic {topic_id+1}: {topic}")
+
+# 8. Plot sentiment flow
+plt.figure(figsize=(10, 5))
+plt.plot(df.index, df['sentiment'], marker='o', linestyle='-')
+plt.axhline(y=0, color='r', linestyle='--', alpha=0.3)
+plt.xlabel('Dialogue Turn')
+plt.ylabel('Sentiment Score')
+plt.title('Emotional Flow During Therapy Session')
+plt.tight_layout()
+plt.savefig('sentiment_flow.png')
+print("\nSentiment flow chart saved as 'sentiment_flow.png'")
+```
+
+Run this script with:
+
+```bash
+python minimal_example.py
+```
+
+This simplified script demonstrates:
+
+- Basic transcript parsing
+- Sentiment analysis with VADER
+- Topic modeling with LDA
+- Simple visualization
+- Core NLP concepts used in the full pipeline
+
+For advanced features like progress tracking across multiple sessions, LLM integration, or customized report generation, use the full pipeline as described above.
+
 ## Usage
 
 ### Basic Usage
@@ -51,6 +338,69 @@ The pipeline is configured using a TOML file at `src/config/config.toml`. Key co
 - Visualization settings
 - Report generation options
 - LLM integration settings
+
+#### Environment Variables with dotenv
+
+For sensitive information like API keys and environment-specific settings, the pipeline uses `python-dotenv` to load variables from a `.env` file. To use this feature:
+
+1. Copy the example file to create your own `.env`:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit the `.env` file and fill in your values:
+
+   ```
+   OPENAI_API_KEY=sk-your-actual-key
+   ANTHROPIC_API_KEY=sk-ant-your-actual-key
+   ```
+
+3. The application will automatically load these variables at startup. You can access them in your code using:
+
+   ```python
+   import os
+   from dotenv import load_dotenv
+
+   # Load environment variables from .env file
+   load_dotenv()
+
+   # Access variables
+   openai_key = os.getenv("OPENAI_API_KEY")
+   ```
+
+This approach is safer than hardcoding keys in your configuration files or scripts, especially if you're sharing your code or using version control.
+
+##### Example Script
+
+The repository includes an example script that demonstrates how to use dotenv in your code:
+
+```bash
+# Run the dotenv example script
+python src/examples/dotenv_example.py
+```
+
+This script shows how to:
+
+- Load environment variables from a .env file
+- Access variables with fallback values
+- Configure different aspects of the pipeline based on environment settings
+- Securely handle API keys
+
+##### Available Environment Variables
+
+| Variable                    | Description                                 | Default  |
+| --------------------------- | ------------------------------------------- | -------- |
+| `OPENAI_API_KEY`            | Your OpenAI API key                         | None     |
+| `ANTHROPIC_API_KEY`         | Your Anthropic API key                      | None     |
+| `DEBUG`                     | Enable debug mode                           | false    |
+| `LOG_LEVEL`                 | Logging level                               | INFO     |
+| `NUM_TOPICS`                | Number of topics for LDA modeling           | 5        |
+| `MIN_TOPIC_COHERENCE`       | Minimum coherence score for topics          | 0.3      |
+| `SENTIMENT_THRESHOLD`       | Threshold for significant sentiment changes | 0.05     |
+| `GENERATE_VISUALIZATIONS`   | Whether to generate visualization files     | true     |
+| `SAVE_INTERMEDIATE_RESULTS` | Save intermediate processing results        | false    |
+| `REPORT_FORMAT`             | Format for generated reports                | markdown |
 
 #### LLM Configuration
 

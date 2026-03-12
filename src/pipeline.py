@@ -16,13 +16,13 @@ from datetime import datetime
 import toml
 
 # Local imports
-from preprocessor.text_processor import TextProcessor
-from analyzers.sentiment_analyzer import SentimentAnalyzer
-from analyzers.topic_modeler import TopicModeler
-from visualizers.visualization import Visualizer
-from reports.report_generator import ReportGenerator
-from data.data_loader import DataLoader
-from llm.llm_insight_generator import LLMInsightGenerator
+from src.preprocessor.text_processor import TextProcessor
+from src.analyzers.sentiment_analyzer import SentimentAnalyzer
+from src.analyzers.topic_modeler import TopicModeler
+from src.visualizers.visualization import Visualizer
+from src.reports.report_generator import ReportGenerator
+from src.data.data_loader import DataLoader
+from src.llm.llm_insight_generator import LLMInsightGenerator
 
 
 class Pipeline:
@@ -215,7 +215,8 @@ def parse_arguments():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the application."""
     # Ensure logs directory exists
     os.makedirs("logs", exist_ok=True)
 
@@ -232,3 +233,8 @@ if __name__ == "__main__":
     results = pipeline.run(input_dir=args.input, output_dir=args.output)
 
     print("Analysis completed successfully!")
+    return 0
+
+
+if __name__ == "__main__":
+    main()

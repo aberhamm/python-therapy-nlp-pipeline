@@ -87,6 +87,8 @@ class DataLoader:
                 # Load transcript based on file format
                 if self.input_format.lower() == "mdx":
                     transcript = self._parse_mdx_file(file_path)
+                elif self.input_format.lower() == "md":
+                    transcript = self._parse_md_file(file_path)
                 elif self.input_format.lower() == "json":
                     transcript = self._parse_json_file(file_path)
                 elif self.input_format.lower() in ["txt", "text"]:
@@ -180,6 +182,47 @@ class DataLoader:
             )
 
         return {"metadata": metadata, "dialogue": dialogue, "raw_content": content}
+
+    def _parse_md_file(self, file_path):
+        """Parse an MD (Markdown) file containing a therapy session transcript.
+
+        Args:
+            file_path (str): Path to the MD file
+
+        Returns:
+            dict: Parsed transcript with content and metadata
+        """
+        with open(file_path, "r", encoding="utf-8") as file:
+            content = file.read()
+
+        # Parse dialogue segments
+        dialogue = []
+        current_speaker = None
+        current_text = []
+
+        for line in content.split("\n"):
+            # Check if line is a speaker identification
+            if line.strip().startswith("**"):
+                # If we have accumulated text for a previous speaker, add it
+                if current_speaker and current_text:
+                    dialogue.append(
+                        {"speaker": current_speaker, "text": " ".join(current_text)}
+                    )
+
+                # Start new speaker segment
+                current_speaker = line.strip()[2:-2].strip()
+                current_text = []
+            elif line.strip():
+                # Add line to current speaker's text
+                current_text.append(line.strip())
+
+        # Add last segment
+        if current_speaker and current_text:
+            dialogue.append(
+                {"speaker": current_speaker, "text": " ".join(current_text)}
+            )
+
+        return {"metadata": {}, "dialogue": dialogue, "raw_content": content}
 
     def _parse_json_file(self, file_path):
         """Parse a JSON file containing a therapy session transcript.

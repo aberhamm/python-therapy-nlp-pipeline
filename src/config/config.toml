@@ -1,7 +1,7 @@
 [data]
 raw_data_dir = "data/raw"
 processed_data_dir = "data/processed"
-input_format = "mdx"  # Format of the input files
+input_format = "md"  # Format of the input files
 
 [preprocessing]
 remove_stopwords = true
@@ -24,7 +24,7 @@ max_df = 0.9       # Maximum document frequency (as a percentage)
 
 [llm]
 enabled = true     # Whether to use LLM features
-model = "openai"   # LLM provider: "openai", "anthropic", or "local"
+model = "local"   # LLM provider: "openai", "anthropic", or "local"
 api_key = ""       # API key (or use environment variable OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)
 temperature = 0.3  # Controls randomness (0.0 = deterministic, 1.0 = creative)
 max_tokens = 1000  # Maximum number of tokens in the response
